@@ -15,29 +15,32 @@
     <script src="index.js" defer></script>
   </head>
   <body>
+    <!-- Modal para inserir nomes dos jogadores -->
+    <section id="section-modal"></section>
+
     <div class="background-overlay"></div>
     <main data-theme="dark">
       <header>
         <h1>Jogo da Velha</h1>
       </header>
-      <button id="novo-jogo">Novo Jogo</button>
+      <button id="novo-jogo">Inserir Jogadores</button>
       <section>
         <div class="players-label">
           <p id="player1-label">
-            <span id="player1-span">Moisés</span> versus
-            <span id="player2-span">José</span>
+            <span id="player1-span">Jogador...</span> versus
+            <span id="player2-span">Jogador...</span>
           </p>
         </div>
         <div class="grid">
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
+          <div id="0-0" class="cell"></div>
+          <div id="0-1" class="cell"></div>
+          <div id="0-2" class="cell"></div>
+          <div id="1-0" class="cell"></div>
+          <div id="1-1" class="cell"></div>
+          <div id="1-2" class="cell"></div>
+          <div id="2-0" class="cell"></div>
+          <div id="2-1" class="cell"></div>
+          <div id="2-2" class="cell"></div>
         </div>
       </section>
     </main>
