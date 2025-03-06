@@ -14,7 +14,11 @@ O jogo precisa atender aos seguintes requisitos:
 
 */
 let jogo = {};
-let marcador = "X";
+jogo.Marker = "X";
+jogo.player1 = "";
+jogo.player2 = "";
+jogo.posPlayer1 = [];
+jogo.posPlayer2 = [];
 
 const sectionModal = document.getElementById("section-modal");
 const divNameModal = document.createElement("div");
@@ -25,16 +29,6 @@ const player1Input = document.createElement("input");
 const labelPlayer2 = document.createElement("label");
 const player2Input = document.createElement("input");
 const startButton = document.createElement("button");
-
-const div00 = document.getElementById("0-0");
-const div01 = document.getElementById("0-1");
-const div02 = document.getElementById("0-2");
-const div10 = document.getElementById("1-0");
-const div11 = document.getElementById("1-1");
-const div12 = document.getElementById("1-2");
-const div20 = document.getElementById("2-0");
-const div21 = document.getElementById("2-1");
-const div22 = document.getElementById("2-2");
 
 // Cria o modal
 document.getElementById("novo-jogo").addEventListener("click", () => {
@@ -73,17 +67,18 @@ startButton.addEventListener("click", () => {
   const player1Name = player1Input.value.trim();
   const player2Name = player2Input.value.trim();
 
-  jogo.player1 = player1Name;
-  jogo.player2 = player2Name;
-
+  // se um dos dois ou os dois forem vazios, retorna um alert
   if (player1Name === "" || player2Name === "") {
     alert("Por favor, insira os nomes dos jogadores.");
     return;
   }
-
   // Atualiza os nomes na interface
   document.getElementById("player1-span").textContent = player1Name;
   document.getElementById("player2-span").textContent = player2Name;
+
+  // adiciona os nomes dos jogadores no obj jogo
+  jogo.player1 = player1Name;
+  jogo.player2 = player2Name;
 
   // Esconde o modal
   divNameModal.classList.add("hidden");
@@ -93,39 +88,99 @@ startButton.addEventListener("click", () => {
   const playerSelecionado = escolha === 0 ? "player1-span" : "player2-span";
   const playerNaoSelecionado = escolha === 0 ? "player2-span" : "player1-span";
 
-  // Remove a classe do jogador não selecionado
-  document
-    .getElementById(playerNaoSelecionado)
-    .classList.remove("selected-player");
-
-  // Adiciona a classe ao jogador selecionado
-  document.getElementById(playerSelecionado).classList.add("selected-player");
-
-  // Atualiza a variável de controle do turno
-  jogo.jogadorAtual = playerSelecionado;
+  changePLayer(playerSelecionado, playerNaoSelecionado);
 });
 
+function changePLayer(selecionado, naoSelecionado) {
+  // Remove a classe do jogador não selecionado
+  document.getElementById(naoSelecionado).classList.remove("selected-player");
+
+  // Adiciona a classe ao jogador selecionado
+  document.getElementById(selecionado).classList.add("selected-player");
+
+  // Atualiza a variável de controle do turno
+  jogo.tagJogadorAtual = selecionado;
+  jogo.tagJogadorEmEspera = naoSelecionado;
+  jogo.jogadorAtual = document.getElementById(selecionado).textContent;
+  jogo.jogadorEmEspera = document.getElementById(naoSelecionado).textContent;
+  //printJogo();
+}
+
 function runGame() {
-  let lastClick = 0;
   const divs = document.querySelectorAll(".cell");
+
+  // nodelist com as posições do jogo da velha
   divs.forEach((div, i) => {
     div.addEventListener("click", () => {
-      if (div.textContent === "") {
-        div.textContent = marcador;
-        div.style.color = marcador === "X" ? "#ff0000" : "black"; // Define a cor
-        marcador = marcador === "X" ? "O" : "X";
-        lastClick = i;
+      if (jogo.player1 == "" || jogo.player2 === "") {
+        alert("Para iniciar o jogo digite os nomes dos jogadores");
+        return;
       } else {
-        alert("Posição já marcada");
-      }
+        if (div.textContent === "") {
+          // Coloca X ou O no jogo
+          div.textContent = jogo.Marker;
+          div.style.color = jogo.Marker === "X" ? "#ff0000" : "black"; // Define a cor
+          jogo.Marker = jogo.Marker === "X" ? "O" : "X";
 
-      // check de fim de jogo
-      // 00 01 02
-      // 10 11 12
-      // 20 21 22
-      console.log(i);
+          if (jogo.jogadorAtual === jogo.player1) {
+            jogo.posPlayer1.push(i);
+          } else {
+            jogo.posPlayer2.push(i);
+          }
+
+          // troca a vez do jogador
+          let troca = jogo.tagJogadorAtual;
+          jogo.tagJogadorAtual = jogo.tagJogadorEmEspera;
+          jogo.tagJogadorEmEspera = troca;
+
+          changePLayer(jogo.tagJogadorAtual, jogo.tagJogadorEmEspera);
+          printJogo();
+
+          // check de fim de jogo
+          // pos_0 pos_1 pos_2
+          // pos_3 pos_4 pos_5
+          // pos_6 pos_7 pos_8
+
+          // posições vencedoras
+          // 00 01 02
+          // 00 10 20
+          // 00 11 22
+          // 01 11 21
+          // 01 12 22
+          // 02 11 20
+          // 10 11 12
+          // 20 21 22
+        } else {
+          alert("Posição já marcada");
+        }
+      }
     });
   });
+}
+
+function printJogo() {
+  let texto =
+    "Player 01: " +
+    jogo.player1 +
+    "\nPlayer 02: " +
+    jogo.player2 +
+    "\nAtual: " +
+    jogo.jogadorAtual +
+    "\nEm espera: " +
+    jogo.jogadorEmEspera +
+    "\n********************" +
+    "\nPosições de " +
+    jogo.player1 +
+    " = [" +
+    jogo.posPlayer1 +
+    "]" +
+    "\nPosições de: " +
+    jogo.player2 +
+    " = [" +
+    jogo.posPlayer2 +
+    "]";
+
+  console.log(texto);
 }
 
 runGame();
