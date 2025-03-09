@@ -20,7 +20,23 @@ jogo.player2 = "";
 jogo.posPlayer1 = [];
 jogo.posPlayer2 = [];
 
+let resultado = [];
+
+let jogoVelha = [
+  [0, 1, 2],
+  [0, 3, 6],
+  [0, 4, 8],
+  [1, 4, 7],
+  [2, 5, 8],
+  [2, 4, 6],
+  [3, 4, 5],
+  [6, 7, 8],
+];
+
 const sectionModal = document.getElementById("section-modal");
+const makerLeft = document.getElementById("maker-left-span");
+const makerRight = document.getElementById("maker-right-span");
+
 const divNameModal = document.createElement("div");
 const divModalContent = document.createElement("div");
 const h2Modal = document.createElement("h2");
@@ -29,6 +45,7 @@ const player1Input = document.createElement("input");
 const labelPlayer2 = document.createElement("label");
 const player2Input = document.createElement("input");
 const startButton = document.createElement("button");
+const cancelButton = document.createElement("button");
 
 // Cria o modal
 document.getElementById("novo-jogo").addEventListener("click", () => {
@@ -46,6 +63,8 @@ document.getElementById("novo-jogo").addEventListener("click", () => {
   player2Input.placeholder = "Nome do jogador 2";
   startButton.id = "startGame";
   startButton.textContent = "Iniciar Jogo";
+  cancelButton.id = "cancelGame";
+  cancelButton.textContent = "Cancelar";
 
   divModalContent.append(
     h2Modal,
@@ -53,7 +72,8 @@ document.getElementById("novo-jogo").addEventListener("click", () => {
     player1Input,
     labelPlayer2,
     player2Input,
-    startButton
+    startButton,
+    cancelButton
   );
   divNameModal.appendChild(divModalContent);
 
@@ -80,15 +100,28 @@ startButton.addEventListener("click", () => {
   jogo.player1 = player1Name;
   jogo.player2 = player2Name;
 
-  // Esconde o modal
-  divNameModal.classList.add("hidden");
-
   // Escolhe aleatoriamente quem começa
   const escolha = Math.floor(Math.random() * 2);
   const playerSelecionado = escolha === 0 ? "player1-span" : "player2-span";
   const playerNaoSelecionado = escolha === 0 ? "player2-span" : "player1-span";
 
+  if (playerSelecionado === "player1-span") {
+    makerLeft.textContent = "X - ";
+    makerRight.textContent = " - O";
+  } else {
+    makerLeft.textContent = "O - ";
+    makerRight.textContent = " - X";
+  }
+
   changePLayer(playerSelecionado, playerNaoSelecionado);
+
+  // Esconde o modal
+  divNameModal.classList.add("hidden");
+});
+
+cancelButton.addEventListener("click", (e) => {
+  // Esconde o modal
+  divNameModal.classList.add("hidden");
 });
 
 function changePLayer(selecionado, naoSelecionado) {
@@ -104,6 +137,27 @@ function changePLayer(selecionado, naoSelecionado) {
   jogo.jogadorAtual = document.getElementById(selecionado).textContent;
   jogo.jogadorEmEspera = document.getElementById(naoSelecionado).textContent;
   //printJogo();
+}
+
+function verificaVitoria(posPlayer, combinacoes) {
+  return combinacoes.some((combinacao) =>
+    combinacao.every((num) => posPlayer.includes(num))
+  );
+}
+
+function verificaVitoria2(posPlayer, combinacoes) {
+  for (let combinacao of combinacoes) {
+    if (combinacao.every((num) => posPlayer.includes(num))) {
+      return combinacao; // Retorna a combinação vencedora
+    }
+  }
+  return null; // Se não houver vitória, retorna null
+}
+
+function highlightWinner(combo) {
+  combo.forEach((pos) => {
+    document.getElementById(`pos_${pos}`).classList.add("winner");
+  });
 }
 
 function runGame() {
@@ -124,9 +178,25 @@ function runGame() {
 
           if (jogo.jogadorAtual === jogo.player1) {
             jogo.posPlayer1.push(i);
+            if (jogo.posPlayer1.length >= 3) {
+              resultado = verificaVitoria2(jogo.posPlayer1, jogoVelha);
+              if (resultado) {
+                console.log("Venceu com a combinação:", resultado);
+                highlightWinner(resultado);
+              }
+            }
           } else {
             jogo.posPlayer2.push(i);
+            if (jogo.posPlayer2.length >= 3) {
+              resultado = verificaVitoria2(jogo.posPlayer2, jogoVelha);
+              if (resultado) {
+                console.log("Venceu com a combinação:", resultado);
+                highlightWinner(resultado);
+              }
+            }
           }
+
+          printJogo();
 
           // troca a vez do jogador
           let troca = jogo.tagJogadorAtual;
@@ -134,22 +204,6 @@ function runGame() {
           jogo.tagJogadorEmEspera = troca;
 
           changePLayer(jogo.tagJogadorAtual, jogo.tagJogadorEmEspera);
-          printJogo();
-
-          // check de fim de jogo
-          // pos_0 pos_1 pos_2
-          // pos_3 pos_4 pos_5
-          // pos_6 pos_7 pos_8
-
-          // posições vencedoras
-          // 00 01 02
-          // 00 10 20
-          // 00 11 22
-          // 01 11 21
-          // 01 12 22
-          // 02 11 20
-          // 10 11 12
-          // 20 21 22
         } else {
           alert("Posição já marcada");
         }
@@ -160,15 +214,6 @@ function runGame() {
 
 function printJogo() {
   let texto =
-    "Player 01: " +
-    jogo.player1 +
-    "\nPlayer 02: " +
-    jogo.player2 +
-    "\nAtual: " +
-    jogo.jogadorAtual +
-    "\nEm espera: " +
-    jogo.jogadorEmEspera +
-    "\n********************" +
     "\nPosições de " +
     jogo.player1 +
     " = [" +

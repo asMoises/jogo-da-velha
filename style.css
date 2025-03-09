@@ -35,6 +35,13 @@ body {
   color: #ffcc00;
 }
 
+.marker-left-span {
+  color: red;
+}
+.marker-right-span {
+  color: black;
+}
+
 div.grid {
   display: grid;
   grid-template-columns: repeat(3, 120px);
@@ -75,6 +82,7 @@ button {
   border-radius: 5px;
   margin-top: 20px;
   transition: background-color 0.3s;
+  margin: 10px;
 }
 
 button:hover {
@@ -168,4 +176,9 @@ button:hover {
 /* Esconder modal */
 .hidden {
   display: none;
+}
+
+.cell.winner {
+  background-color: yellow;
+  transform: scale(1.1);
 }
