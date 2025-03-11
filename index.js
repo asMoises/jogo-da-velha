@@ -13,6 +13,7 @@ O jogo precisa atender aos seguintes requisitos:
 - Deve ser possível reiniciar o jogo para jogar novamente.
 
 */
+
 let game = {};
 game.Marker = "X";
 game.player1 = "";
@@ -202,6 +203,7 @@ function runGame() {
               game.resultGame = checkWin(game.posPlayer1, ticTacToe);
               if (game.resultGame) {
                 // if true, game is done!
+                alert("Venceu " + game.player1);
                 console.log("Venceu com a combinação:", game.resultGame);
                 // set the winner's style
                 highlightWinner(game.resultGame);
@@ -217,6 +219,7 @@ function runGame() {
               game.resultGame = checkWin(game.posPlayer2, ticTacToe);
               if (game.resultGame) {
                 // if true, game is done!
+                alert("Venceu " + game.player2);
                 console.log("Venceu com a combinação:", game.resultGame);
                 // set the winner's style
                 highlightWinner(game.resultGame);
