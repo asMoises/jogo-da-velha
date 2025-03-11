@@ -13,16 +13,16 @@ O jogo precisa atender aos seguintes requisitos:
 - Deve ser possível reiniciar o jogo para jogar novamente.
 
 */
-let jogo = {};
-jogo.Marker = "X";
-jogo.player1 = "";
-jogo.player2 = "";
-jogo.posPlayer1 = [];
-jogo.posPlayer2 = [];
+let game = {};
+game.Marker = "X";
+game.player1 = "";
+game.player2 = "";
+game.posPlayer1 = [];
+game.posPlayer2 = [];
+game.click = 0;
+game.resultGame = [];
 
-let resultado = [];
-
-let jogoVelha = [
+let ticTacToe = [
   [0, 1, 2],
   [0, 3, 6],
   [0, 4, 8],
@@ -36,7 +36,7 @@ let jogoVelha = [
 const sectionModal = document.getElementById("section-modal");
 const makerLeft = document.getElementById("maker-left-span");
 const makerRight = document.getElementById("maker-right-span");
-
+const divs = document.querySelectorAll(".cell");
 const divNameModal = document.createElement("div");
 const divModalContent = document.createElement("div");
 const h2Modal = document.createElement("h2");
@@ -47,7 +47,7 @@ const player2Input = document.createElement("input");
 const startButton = document.createElement("button");
 const cancelButton = document.createElement("button");
 
-// Cria o modal
+// Creating modals
 document.getElementById("novo-jogo").addEventListener("click", () => {
   divNameModal.id = "nameModal";
   divNameModal.className = "modal";
@@ -81,8 +81,16 @@ document.getElementById("novo-jogo").addEventListener("click", () => {
   sectionModal.appendChild(divNameModal);
 });
 
-// insere os jogadores e escolhe o primeiro a jogar
+// button start actions
 startButton.addEventListener("click", () => {
+  divs.forEach((div) => {
+    div.textContent = "";
+    game.click = 0;
+    resetWinnerHighlight();
+  });
+  game.posPlayer1 = [];
+  game.posPlayer2 = [];
+
   // Pegando os nomes digitados
   const player1Name = player1Input.value.trim();
   const player2Name = player2Input.value.trim();
@@ -97,8 +105,8 @@ startButton.addEventListener("click", () => {
   document.getElementById("player2-span").textContent = player2Name;
 
   // adiciona os nomes dos jogadores no obj jogo
-  jogo.player1 = player1Name;
-  jogo.player2 = player2Name;
+  game.player1 = player1Name;
+  game.player2 = player2Name;
 
   // Escolhe aleatoriamente quem começa
   const escolha = Math.floor(Math.random() * 2);
@@ -124,86 +132,135 @@ cancelButton.addEventListener("click", (e) => {
   divNameModal.classList.add("hidden");
 });
 
+// *** Functions
+function showModal() {
+  divNameModal.classList.remove("hidden");
+}
+
 function changePLayer(selecionado, naoSelecionado) {
-  // Remove a classe do jogador não selecionado
+  // Remove the non-selected player css-class
   document.getElementById(naoSelecionado).classList.remove("selected-player");
 
-  // Adiciona a classe ao jogador selecionado
+  // set the chosen player to css-class
   document.getElementById(selecionado).classList.add("selected-player");
 
-  // Atualiza a variável de controle do turno
-  jogo.tagJogadorAtual = selecionado;
-  jogo.tagJogadorEmEspera = naoSelecionado;
-  jogo.jogadorAtual = document.getElementById(selecionado).textContent;
-  jogo.jogadorEmEspera = document.getElementById(naoSelecionado).textContent;
-  //printJogo();
+  // set the  data to selected player and non-selected player
+  game.tagRunningPlayer = selecionado;
+  game.tagWaitingPlayer = naoSelecionado;
+  game.runningPlayer = document.getElementById(selecionado).textContent;
+  game.waitingPlayer = document.getElementById(naoSelecionado).textContent;
 }
 
-function verificaVitoria(posPlayer, combinacoes) {
-  return combinacoes.some((combinacao) =>
-    combinacao.every((num) => posPlayer.includes(num))
-  );
-}
-
-function verificaVitoria2(posPlayer, combinacoes) {
-  for (let combinacao of combinacoes) {
-    if (combinacao.every((num) => posPlayer.includes(num))) {
-      return combinacao; // Retorna a combinação vencedora
-    }
-  }
-  return null; // Se não houver vitória, retorna null
-}
-
+// apply the css style to the winner
 function highlightWinner(combo) {
   combo.forEach((pos) => {
     document.getElementById(`pos_${pos}`).classList.add("winner");
   });
 }
 
-function runGame() {
-  const divs = document.querySelectorAll(".cell");
+// remove the winner's css style
+function resetWinnerHighlight() {
+  document.querySelectorAll(".cell.winner").forEach((cell) => {
+    cell.classList.remove("winner");
+  });
+}
 
+// check the match position beteew the player position and winner positions
+function checkWin(posPlayer, combinacoes) {
+  for (let combinacao of combinacoes) {
+    if (combinacao.every((num) => posPlayer.includes(num))) {
+      return combinacao; // Retorna a combinação vencedora
+    }
+  }
+  return null; // in caso of no winner.
+}
+
+// Main Function
+function runGame() {
   // nodelist com as posições do jogo da velha
   divs.forEach((div, i) => {
     div.addEventListener("click", () => {
-      if (jogo.player1 == "" || jogo.player2 === "") {
+      if (game.player1 === "" || game.player2 === "") {
         alert("Para iniciar o jogo digite os nomes dos jogadores");
         return;
       } else {
         if (div.textContent === "") {
-          // Coloca X ou O no jogo
-          div.textContent = jogo.Marker;
-          div.style.color = jogo.Marker === "X" ? "#ff0000" : "black"; // Define a cor
-          jogo.Marker = jogo.Marker === "X" ? "O" : "X";
+          // click's counter
+          game.click++;
+          console.log("Clicks: " + game.click);
 
-          if (jogo.jogadorAtual === jogo.player1) {
-            jogo.posPlayer1.push(i);
-            if (jogo.posPlayer1.length >= 3) {
-              resultado = verificaVitoria2(jogo.posPlayer1, jogoVelha);
-              if (resultado) {
-                console.log("Venceu com a combinação:", resultado);
-                highlightWinner(resultado);
+          // set X or O on the display
+          div.textContent = game.Marker;
+          div.style.color = game.Marker === "X" ? "#ff0000" : "black"; // Define a cor
+          game.Marker = game.Marker === "X" ? "O" : "X";
+
+          // if player 1
+          if (game.runningPlayer === game.player1) {
+            game.posPlayer1.push(i); // set the position to the running player
+            if (game.posPlayer1.length >= 3) {
+              // recieve the winner combination
+              game.resultGame = checkWin(game.posPlayer1, ticTacToe);
+              if (game.resultGame) {
+                // if true, game is done!
+                console.log("Venceu com a combinação:", game.resultGame);
+                // set the winner's style
+                highlightWinner(game.resultGame);
+                return;
               }
             }
+
+            // if player 2
           } else {
-            jogo.posPlayer2.push(i);
-            if (jogo.posPlayer2.length >= 3) {
-              resultado = verificaVitoria2(jogo.posPlayer2, jogoVelha);
-              if (resultado) {
-                console.log("Venceu com a combinação:", resultado);
-                highlightWinner(resultado);
+            game.posPlayer2.push(i);
+            if (game.posPlayer2.length >= 3) {
+              // recieve the winner combination
+              game.resultGame = checkWin(game.posPlayer2, ticTacToe);
+              if (game.resultGame) {
+                // if true, game is done!
+                console.log("Venceu com a combinação:", game.resultGame);
+                // set the winner's style
+                highlightWinner(game.resultGame);
+                return;
               }
             }
           }
 
-          printJogo();
+          printingGame();
 
-          // troca a vez do jogador
-          let troca = jogo.tagJogadorAtual;
-          jogo.tagJogadorAtual = jogo.tagJogadorEmEspera;
-          jogo.tagJogadorEmEspera = troca;
+          // changing plyaers
+          let changing = game.tagRunningPlayer;
+          game.tagRunningPlayer = game.tagWaitingPlayer;
+          game.tagWaitingPlayer = changing;
 
-          changePLayer(jogo.tagJogadorAtual, jogo.tagJogadorEmEspera);
+          changePLayer(game.tagRunningPlayer, game.tagWaitingPlayer);
+
+          console.log("vamos ver o click?");
+          // check no winners
+          if (game.click == 9) {
+            console.log(game.click);
+            let confirmation = confirm("Empate!");
+
+            if (confirmation) {
+              document.getElementById("player1-span").textContent =
+                "Jogador...";
+              document.getElementById("player2-span").textContent =
+                "Jogador...";
+              makerLeft.textContent = "";
+              makerRight.textContent = "";
+
+              document
+                .getElementById("player1-span")
+                .classList.remove("selected-player");
+              document
+                .getElementById("player2-span")
+                .classList.remove("selected-player");
+
+              divs.forEach((e) => {
+                e.textContent = "";
+                resetWinnerHighlight();
+              });
+            }
+          }
         } else {
           alert("Posição já marcada");
         }
@@ -212,17 +269,18 @@ function runGame() {
   });
 }
 
-function printJogo() {
+// aux function
+function printingGame() {
   let texto =
     "\nPosições de " +
-    jogo.player1 +
+    game.player1 +
     " = [" +
-    jogo.posPlayer1 +
+    game.posPlayer1 +
     "]" +
     "\nPosições de: " +
-    jogo.player2 +
+    game.player2 +
     " = [" +
-    jogo.posPlayer2 +
+    game.posPlayer2 +
     "]";
 
   console.log(texto);
